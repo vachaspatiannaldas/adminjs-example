@@ -4,6 +4,8 @@ import express from 'express';
 import mongoose from 'mongoose';
 import { buildAuthenticatedRouter } from '@adminjs/express';
 import * as AdminJSMongoose from '@adminjs/mongoose';
+import { usersSchema } from "./users.js";
+import { citiesSchema } from "./cities.js";
 
 const PORT = 3000;
 
@@ -16,10 +18,9 @@ const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 // Define a User model
-const User = mongoose.model('User', new mongoose.Schema({
-  email: { type: String, required: true },
-  password: { type: String, required: true },
-}));
+const Users = mongoose.model("Users", usersSchema);
+const Cities = mongoose.model("Cities", citiesSchema);
+
 
 // Default admin credentials
 const DEFAULT_ADMIN = {
@@ -46,14 +47,10 @@ const start = async () => {
   const admin = new AdminJS({
     databases: [mongoose],
     rootPath: '/admin',
-    resources: [{
-      resource: User,
-      options: {
-        properties: {
-          password: { isVisible: false }, // Hide password in AdminJS panel
-        },
-      },
-    }],
+    resources: [
+        {resource: Users},
+        {resource: Cities}    
+    ],
   });
 
   // Build authenticated AdminJS router with session-based authentication
@@ -70,5 +67,4 @@ const start = async () => {
   });
 };
 
-// Start the server
 start();
